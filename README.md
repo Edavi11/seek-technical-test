@@ -390,7 +390,7 @@ GET /api-docs                     # OpenAPI specification
 First, you need to authenticate to get a JWT token:
 
 ```bash
-# Exmaple Login to get JWT token
+# Example Login to get JWT token
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
@@ -428,11 +428,8 @@ curl -X POST http://localhost:8080/api/v1/customers \
   -d '{
     "firstName": "John",
     "lastName": "Doe",
-    "email": "john.doe@example.com",
-    "phone": "+1234567890",
-    "birthDate": "1990-01-15",
     "age": 33,
-    "address": "123 Main St, City, Country"
+    "birthDate": "1992-08-03"
   }'
 
 # Update customer
@@ -442,11 +439,8 @@ curl -X PUT http://localhost:8080/api/v1/customers/1 \
   -d '{
     "firstName": "John Updated",
     "lastName": "Doe",
-    "email": "john.updated@example.com",
-    "phone": "+1234567890",
-    "birthDate": "1990-01-15",
-    "age": 33,
-    "address": "456 Updated St, City, Country"
+    "age": 34,
+    "birthDate": "1992-08-03"
   }'
 
 # Get customer metrics
