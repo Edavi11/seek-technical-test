@@ -345,20 +345,169 @@ LOGGING_LEVEL_ORG_HIBERNATE_SQL=DEBUG
 
 ## 📚 API Endpoints
 
-### Authentication
+### 🔐 Authentication
 ```
-POST /api/v1/auth/login
-POST /api/v1/auth/register
+POST /api/v1/auth/login           # Authenticate user and get JWT token
 ```
 
-### Customer Management
+### 👥 User Management
 ```
-GET    /api/v1/customers          # Get all customers
+GET    /api/v1/users              # Get all users (active and inactive)
+POST   /api/v1/users              # Create a new user
+PUT    /api/v1/users/{id}/activate    # Activate a user
+PUT    /api/v1/users/{id}/deactivate  # Deactivate a user
+PUT    /api/v1/users/{id}/password    # Change user password
+DELETE /api/v1/users/{id}         # Delete a user completely
+```
+
+### 👤 Customer Management
+```
+GET    /api/v1/customers?page=1&size=10  # Get customers with pagination
 GET    /api/v1/customers/{id}     # Get customer by ID
-POST   /api/v1/customers          # Create new customer
-PUT    /api/v1/customers/{id}     # Update customer
-DELETE /api/v1/customers/{id}     # Delete customer
+GET    /api/v1/customers/metrics  # Get customer metrics (age statistics)
+POST   /api/v1/customers          # Create a new customer
+PUT    /api/v1/customers/{id}     # Update customer data
+DELETE /api/v1/customers/{id}     # Delete a customer
 ```
+
+### 📊 Monitoring & Health
+```
+GET /actuator/health              # Health check
+GET /actuator/custom-info         # Detailed application information
+GET /actuator/metrics             # Application metrics
+GET /actuator/prometheus          # Prometheus metrics
+```
+
+### 📖 Documentation
+```
+GET /swagger-ui.html              # Swagger interface
+GET /api-docs                     # OpenAPI specification
+```
+
+## 🔄 API Usage Flow Example
+
+### Step 1: Authentication
+First, you need to authenticate to get a JWT token:
+
+```bash
+# Exmaple Login to get JWT token
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Step 2: Use JWT Token for API Calls
+Once you have the JWT token, use it in the Authorization header for all subsequent requests:
+
+```bash
+# Set your JWT token
+JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Get all customers (paginated)
+curl -X GET "http://localhost:8080/api/v1/customers?page=1&size=10" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Get customer by ID
+curl -X GET "http://localhost:8080/api/v1/customers/1" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Create a new customer
+curl -X POST http://localhost:8080/api/v1/customers \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1234567890",
+    "birthDate": "1990-01-15",
+    "age": 33,
+    "address": "123 Main St, City, Country"
+  }'
+
+# Update customer
+curl -X PUT http://localhost:8080/api/v1/customers/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -d '{
+    "firstName": "John Updated",
+    "lastName": "Doe",
+    "email": "john.updated@example.com",
+    "phone": "+1234567890",
+    "birthDate": "1990-01-15",
+    "age": 33,
+    "address": "456 Updated St, City, Country"
+  }'
+
+# Get customer metrics
+curl -X GET http://localhost:8080/api/v1/customers/metrics \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Delete customer
+curl -X DELETE http://localhost:8080/api/v1/customers/1 \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Step 3: User Management Examples
+
+```bash
+# Get all users
+curl -X GET http://localhost:8080/api/v1/users \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Get only active users
+curl -X GET http://localhost:8080/api/v1/users/active \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Create a new user
+curl -X POST http://localhost:8080/api/v1/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -d '{
+    "username": "newuser",
+    "password": "securepassword123"
+  }'
+
+# Change user password
+curl -X PUT http://localhost:8080/api/v1/users/2/password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -d '{
+    "currentPassword": "oldpassword",
+    "newPassword": "newpassword123",
+    "confirmPassword": "newpassword123"
+  }'
+
+# Activate a user
+curl -X PUT http://localhost:8080/api/v1/users/2/activate \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Deactivate a user
+curl -X PUT http://localhost:8080/api/v1/users/2/deactivate \
+  -H "Authorization: Bearer $JWT_TOKEN"
+
+# Delete a user
+curl -X DELETE http://localhost:8080/api/v1/users/2 \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### 📝 Important Notes
+
+1. **Authentication Required**: All endpoints except `/api/v1/auth/login` require JWT authentication
+2. **Pagination**: Customer listing uses 1-based pagination (page 1, not 0)
+3. **Validation**: All inputs are validated for data integrity and business rules
+4. **Error Handling**: Comprehensive error responses with appropriate HTTP status codes
+5. **Metrics Endpoint**: Provides statistical analysis of customer ages (mean, median, standard deviation, etc.)
 
 ### Monitoring
 ```
@@ -491,15 +640,31 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
-    "password": "password"
+    "password": "admin123"
   }'
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
 ```
 
 ### Use JWT token
 ```bash
+# Set your JWT token
+JWT_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Use in API calls
 curl -X GET http://localhost:8080/api/v1/customers \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+  -H "Authorization: Bearer $JWT_TOKEN"
 ```
+
+### Important Notes
+- **Authentication Required**: All endpoints except `/api/v1/auth/login` require JWT authentication
+- **Token Format**: Include `Bearer ` prefix before the JWT token
+- **Token Expiration**: JWT tokens expire after 24 hours by default
 
 ## 🐳 Docker Deployment
 
