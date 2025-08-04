@@ -23,7 +23,8 @@ REST API for customer management developed with Spring Boot, providing complete 
 - **Automatic security headers**
 
 ### 📊 Monitoring and Observability
-- **Actuator endpoints** for health checks
+- **Actuator endpoints** for health checks and application information
+- **Custom application info endpoint** with detailed system information
 - **CloudWatch metrics** integrated
 - **Centralized logging** in CloudWatch
 - **Automatic health checks** in ECS
@@ -215,7 +216,7 @@ DELETE /api/v1/customers/{id}     # Delete customer
 ### Monitoring
 ```
 GET /actuator/health              # Health check
-GET /actuator/info                # Application information
+GET /actuator/custom-info         # Detailed application information
 GET /actuator/metrics             # Application metrics
 ```
 
@@ -223,6 +224,79 @@ GET /actuator/metrics             # Application metrics
 ```
 GET /swagger-ui.html              # Swagger interface
 GET /api-docs                     # OpenAPI specification
+```
+
+### Application Information
+The application provides detailed information through the Actuator endpoint:
+
+#### `/actuator/custom-info` (Actuator Endpoint)
+- **Purpose**: Standard Spring Boot Actuator endpoint for application monitoring
+- **Response**: Detailed application information including system details, memory usage, and configuration
+- **Access**: Requires authentication in production
+- **Documentation**: Follows Spring Boot Actuator standards
+
+The endpoint returns structured information including:
+- **Application details**: Name, version, author, technology stack
+- **System information**: Java version, OS details, timezone
+- **Memory usage**: Total, free, used, and maximum memory
+- **Application configuration**: Active profiles, server port, context path
+- **Available endpoints**: List of all API endpoints
+
+### Example Usage
+
+#### Get Application Information
+```bash
+curl -X GET http://localhost:8080/actuator/custom-info
+```
+
+#### Example Response
+```json
+{
+  "app": {
+    "name": "Customer Service API",
+    "description": "Spring Boot REST API for Customer Management",
+    "version": "1.0.0",
+    "author": "Erick Avila",
+    "email": "erickdavila11@gmail.com",
+    "technology": "Spring Boot 3.3.13",
+    "javaVersion": "17",
+    "database": "MySQL/AWS RDS",
+    "deployment": "AWS ECS Fargate",
+    "startupTime": "2025-08-04T00:56:40.132"
+  },
+  "system": {
+    "javaVersion": "17.0.2",
+    "javaVendor": "Oracle Corporation",
+    "osName": "Windows 10",
+    "osVersion": "10.0",
+    "userTimezone": "America/New_York",
+    "userHome": "C:\\Users\\erick",
+    "userDir": "C:\\Users\\erick\\OneDrive\\Desktop\\Erick\\Proyectos\\Prueba Tecnica Seek\\seek_test"
+  },
+  "memory": {
+    "totalMemory": "256.0 MB",
+    "freeMemory": "180.5 MB",
+    "usedMemory": "75.5 MB",
+    "maxMemory": "4.0 GB",
+    "availableProcessors": 8
+  },
+  "application": {
+    "activeProfiles": "dev",
+    "serverPort": "8080",
+    "contextPath": "/",
+    "timestamp": "2025-08-04T00:56:40.132"
+  },
+  "endpoints": {
+    "health": "/actuator/health",
+    "metrics": "/actuator/metrics",
+    "prometheus": "/actuator/prometheus",
+    "swagger": "/swagger-ui.html",
+    "apiDocs": "/api-docs",
+    "customers": "/api/v1/customers",
+    "users": "/api/v1/users",
+    "auth": "/api/v1/auth/login"
+  }
+}
 ```
 
 ## 🔐 Authentication
